@@ -9,6 +9,5 @@ import main.java.festivity.Festivity;
 
 public interface Strategy {
 	DateFormat format = new SimpleDateFormat("YYYY-MM-dd");
-	ArrayList<Festivity> festivitiesList = new ArrayList<Festivity>(); 
 	public ArrayList<Festivity> getFestivities(String name, Date from, Date to, String where);
 }

@@ -1,5 +1,5 @@
 /**
- * Load data from XML to DataBase for testing purposes
+ * ETL: Load data from a XML file to store it in a data base for testing purposes
  * @author juanse85
  *
  */

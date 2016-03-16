@@ -44,7 +44,9 @@ public class FestivityController {
 
     @RequestMapping("/festivity")
     public ArrayList<Festivity> byName(@RequestParam(value="name") String name) {
-    	return new Festivity().getBy("name", name, null, null, null);
+    	//return new Festivity().getBy("name", name, null, null, null);
+    	ArrayList<Festivity> f = new Festivity().getBy("name", name, null, null, null);
+    	return f;
     }
     
     @RequestMapping("/festivity_by_date")

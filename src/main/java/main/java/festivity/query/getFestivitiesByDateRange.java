@@ -18,6 +18,8 @@ public class getFestivitiesByDateRange implements Strategy {
 	@Override
 	public ArrayList<Festivity> getFestivities(String name, Date from, Date to, String where) {
 		MongoDatabase db = new DataBase().DBConnect();
+		ArrayList<Festivity> festivitiesList = new ArrayList<Festivity>();
+
 		FindIterable<Document> iterable = db.getCollection("festivities").find(
 				new Document("from", format.format(from)).append("to", format.format(to))
 			);
