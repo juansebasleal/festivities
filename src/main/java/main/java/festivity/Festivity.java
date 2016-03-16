@@ -1,8 +1,11 @@
 package main.java.festivity;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
+import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
@@ -22,11 +25,35 @@ import java.util.Date;
 
 public class Festivity {
 
+	/**
+	 * Unique identifier of the festivity
+	 */
+	private ObjectId id;
+	/**
+	 * Name of the festivity
+	 */
 	private String name;
+	/**
+	 * Inicial date of the festivity
+	 */
 	private Date from;
+	/**
+	 * Final date of the festivity
+	 */
 	private Date to;
+	/**
+	 * Place where the festivity takes place
+	 */
 	private String where;
-	DateFormat format = new SimpleDateFormat("YYYY-MM-dd");
+	/**
+	 * Empty string means the data is ok, or
+	 * String describing the inconsistency on the data
+	 */
+	private String error;
+	/**
+	 * Format of the dates used - UTC timezone
+	 */
+	static DateFormat format = new SimpleDateFormat("YYYY-MM-dd");
 
 	public Festivity() { }
 
@@ -35,24 +62,49 @@ public class Festivity {
 		this.from = from;
 		this.to = to;
 		this.where = where;
+		this.error = "";
 	}
 	
-	public void insert() {
+	/**
+	 * Persist data
+	 * @return boolean
+	 */
+	public boolean insert() {
 
 		MongoDatabase db = new DataBase().DBConnect();
+		ValidateData();
+		if ( this.error.isEmpty() ) {
+			Document doc = new Document()
+			                .append("name", this.name)
+			                .append("from", format.format(this.from))
+			                .append("to", format.format(this.to))
+			                .append("place_id", this.where);
+			db.getCollection("festivities").insertOne(doc);
+			this.id = (ObjectId)doc.get( "_id" );
+		}
 		
-		//DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-		db.getCollection("festivities").insertOne(
-					new Document()
-		                .append("name", this.name)
-		                .append("from", format.format(this.from))
-		                .append("to", format.format(this.to))
-		                .append("place_id", this.where)
-				);
-
-		//return true;
+		return this.error.isEmpty();
 	}
 	
+	/**
+	 * Validate consistency of the attributes
+	 * @return void
+	 */
+	public void ValidateData() {
+		if ( this.from.compareTo(this.to) > 0 ) {
+			this.error = "Start date should never be greater than the end date";
+		}
+	}
+
+	/**
+	 * Method which manages different types of queries 
+	 * @param queryType		Type of query: all, name, start_date, date_range and place
+	 * @param name			Date of the festivity
+	 * @param from			Initial date
+	 * @param to			Final date
+	 * @param where			Place where the festivity takes place
+	 * @return ArrayList<Festivity>
+	 */
 	public ArrayList<Festivity> getBy(String queryType, String name, Date from, Date to, String where) {
 		
 		Context context = null;
@@ -60,7 +112,7 @@ public class Festivity {
 			context = new Context(new getAllFestivities());
 		} else if ( queryType == "name" ) {
 			context = new Context(new getFestivitiesByName());
-		} else if ( queryType == "start_day" ) {
+		} else if ( queryType == "start_date" ) {
 			context = new Context(new getFestivitiesByStartDate());
 		} else if ( queryType == "date_range" ) {
 			context = new Context(new getFestivitiesByDateRange());
@@ -75,6 +127,10 @@ public class Festivity {
 	/*
 	 * Setters and getters
 	 */
+
+	public ObjectId getId() {
+		return id;
+	}
 	
 	public String getName() {
 		return name;
@@ -109,6 +165,15 @@ public class Festivity {
 
 	public Festivity setWhere(String where) {
 		this.where = where;
+		return this;
+	}
+	
+	public String getError() {
+		return error;
+	}
+
+	public Festivity setError(String error) {
+		this.error = error;
 		return this;
 	}
 }

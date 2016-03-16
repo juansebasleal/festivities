@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<festivities>
+	<festivity>
+		<name>Halloween</name>
+		<from>2016-10-31</from>
+		<to>2016-10-31</to>
+		<where>colombia</where>
+	</festivity>
+	<festivity>
+		<name>Hanukkah</name>
+		<from>2016-12-24</from>
+		<to>2017-01-01</to>
+		<where>usa</where>
+	</festivity>
+</festivities>

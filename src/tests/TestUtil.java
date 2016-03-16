@@ -1,4 +1,9 @@
-package tests;
+/**
+ * TODO This class is still unusefull as FestivityControllerTest does not work yet.
+ */
+
+
+//package tests;
 
 import java.nio.charset.Charset;
 

@@ -13,7 +13,10 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 import org.bson.Document;
+
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
+import com.mongodb.DBCollection;
 import com.mongodb.client.FindIterable;
 
 import static com.mongodb.client.model.Filters.*;
@@ -34,15 +37,41 @@ public class FestivityTest {
 		//db.getCollection("festivities").deleteMany(new Document());
     }
 
-    @Ignore
+    @Test
+	public void testValidDates1() throws Exception {
+    	clearCollection("festivities");
+    	Festivity festivity = new Festivity("Halloween", new Date(50, 0, 1), new Date(50, 0, 1),"usa");
+		boolean rs = festivity.insert();
+		
+		assertTrue(rs);
+		assertTrue("".equals(festivity.getError()));
+    }
+    
+    @Test
+	public void testValidDates2() throws Exception {
+    	clearCollection("festivities");
+    	Festivity festivity = new Festivity("Halloween", new Date(50, 0, 1), new Date(50, 0, 23),"usa");
+		boolean rs = festivity.insert();
+		
+		assertTrue(rs);
+		assertTrue("".equals(festivity.getError()));
+    }
+
+    @Test
+	public void testInvalidDates() throws Exception {
+    	clearCollection("festivities");
+
+    	Festivity festivity = new Festivity("Halloween", new Date(50, 1, 1), new Date(50, 0, 23),"usa");
+		boolean rs = festivity.insert();
+
+		assertFalse(rs);
+		assertTrue("Start date should never be greater than the end date".equals(festivity.getError()));
+    }
+
 	@Test
 	public void testInsert() throws Exception {
 
-		// Query database to check out how many festivities there are
-		//int quantityBefore = (int) db.getCollection("festivities").count();
-
-		// Drop all festivities
-		db.getCollection("festivities").deleteMany(new Document());
+    	clearCollection("festivities");
 
 		Festivity festivity = new Festivity("Halloween", new Date(50, 0, 1), new Date(50, 0, 23),"usa");
 		festivity.insert();
@@ -50,15 +79,13 @@ public class FestivityTest {
 		// Query the database again to check if there is a new record 
 		int quantityAfter = (int) db.getCollection("festivities").count();
 
-		db.getCollection("festivities").deleteMany(new Document());
-
 		assertEquals(1, quantityAfter);
 	}
 
 	@Test
 	public void testGetAll() throws Exception {
 
-		db.getCollection("festivities").deleteMany(new Document());
+		clearCollection("festivities");
 
 		// Insert some festivities
 		Festivity festivity = new Festivity("Saint Peter", new Date(50, 0, 1), new Date(50, 0, 23), "usa");
@@ -76,7 +103,7 @@ public class FestivityTest {
 	@Test
 	public void testGetByName() throws Exception {
 		
-		db.getCollection("festivities").deleteMany(new Document());
+		clearCollection("festivities");
 
 		// Insert some festivities
 		Festivity festivity = new Festivity("Peter Man", new Date(50, 0, 1), new Date(50, 0, 23), "usa");
@@ -97,7 +124,7 @@ public class FestivityTest {
 	@Test
 	public void testGetByStartDate() throws Exception {
 		
-		db.getCollection("festivities").deleteMany(new Document());
+		clearCollection("festivities");
 
 		// Insert some festivities
 		Festivity festivity = new Festivity("Peter Man", new Date(116, 0, 1), new Date(116, 0, 23), "usa");
@@ -109,7 +136,7 @@ public class FestivityTest {
 		festivity.setName("She Dog Day").setFrom(new Date(116, 10, 3)).setTo(new Date(116, 10, 13)).setWhere("colombia");
 		festivity.insert();
 
-		ArrayList<Festivity> festivitiesList = new Festivity().getBy("start_day", null, new Date(116, 0, 1), null, null);
+		ArrayList<Festivity> festivitiesList = new Festivity().getBy("start_date", null, new Date(116, 0, 1), null, null);
 
 		//Assertion...
 		assertEquals(2, festivitiesList.size());
@@ -118,7 +145,7 @@ public class FestivityTest {
 	@Test
 	public void testGetByDateRange() throws Exception {
 		
-		db.getCollection("festivities").deleteMany(new Document());
+		clearCollection("festivities");
 
 		// Insert some festivities
 		Festivity festivity = new Festivity("Peter Man", new Date(116, 0, 1), new Date(116, 0, 23), "usa");
@@ -142,7 +169,7 @@ public class FestivityTest {
 	@Test
 	public void testGetByPlace() throws Exception {
 		
-		db.getCollection("festivities").deleteMany(new Document());
+		clearCollection("festivities");
 
 		// Insert some festivities
 		Festivity festivity = new Festivity("Peter Man", new Date(116, 0, 1), new Date(116, 0, 23), "usa");
@@ -159,5 +186,12 @@ public class FestivityTest {
 		assertEquals(2, festivitiesList.size());
 	}
 
+	/**
+	 * Clean (trincate) a collection
+	 * @param coll	The collection to be cleaned
+	 */
+    private void clearCollection(String coll) {
+    	db.getCollection(coll).drop();
+    }
 
 }
