@@ -28,13 +28,13 @@ public class Festivity {
 	/**
 	 * Unique identifier of the festivity
 	 */
-	private ObjectId id;
+	private String id;
 	/**
 	 * Name of the festivity
 	 */
 	private String name;
 	/**
-	 * Inicial date of the festivity
+	 * Initial date of the festivity
 	 */
 	private Date from;
 	/**
@@ -65,6 +65,15 @@ public class Festivity {
 		this.error = "";
 	}
 	
+	public Festivity(String id, String name, Date from, Date to, String where) {
+		this.id = id;
+		this.name = name;
+		this.from = from;
+		this.to = to;
+		this.where = where;
+		this.error = "";
+	}
+	
 	/**
 	 * Persist data
 	 * @return boolean
@@ -80,7 +89,7 @@ public class Festivity {
 			                .append("to", format.format(this.to))
 			                .append("place_id", this.where);
 			db.getCollection("festivities").insertOne(doc);
-			this.id = (ObjectId)doc.get( "_id" );
+			this.id = doc.get( "_id" ).toString();
 		}
 		
 		return this.error.isEmpty();
@@ -128,8 +137,13 @@ public class Festivity {
 	 * Setters and getters
 	 */
 
-	public ObjectId getId() {
+	public String getId() {
 		return id;
+	}
+	
+	public Festivity setId(String id) {
+		this.id = id;
+		return this;
 	}
 	
 	public String getName() {

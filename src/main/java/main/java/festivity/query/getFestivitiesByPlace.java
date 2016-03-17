@@ -27,6 +27,7 @@ public class getFestivitiesByPlace implements Strategy {
 		    public void apply(final Document document) {
 		        try {
 					festivitiesList.add(new Festivity(
+							document.get("_id").toString(),
 							document.getString("name").toString(),
 							format.parse(document.getString("from")),
 							format.parse(document.getString("to")),

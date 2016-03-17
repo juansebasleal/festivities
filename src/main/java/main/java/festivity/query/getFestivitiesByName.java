@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
@@ -26,12 +27,14 @@ public class getFestivitiesByName implements Strategy {
 		    @Override
 		    public void apply(final Document document) {
 		        try {
-					festivitiesList.add(new Festivity(
+		        	Festivity fs = new Festivity(
+		        			document.get("_id").toString(),
 							document.getString("name").toString(),
 							format.parse(document.getString("from")),
 							format.parse(document.getString("to")),
 							document.getString("place_id").toString()
-						));
+						);
+					festivitiesList.add(fs);
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
