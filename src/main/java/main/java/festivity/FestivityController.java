@@ -17,7 +17,7 @@ public class FestivityController {
 	/**
 	 * Format of the dates used - UTC timezone
 	 */
-	static DateFormat format = new SimpleDateFormat("YYYY-MM-dd");
+	static DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
 	@RequestMapping("/create_festivity")
     public String create(
@@ -29,41 +29,102 @@ public class FestivityController {
 		String rs = "";
     	Festivity fs = new Festivity(name, format.parse(from), format.parse(to), where);
     	if (fs.insert()) {
-    		rs = "{\"response\":succesfully created}";
+    		rs = "{ \"status\":200, \"message\": \"succesfully created\" }";
     	} else {
-    		rs = "{\"response\":" + fs.getError() + "}";
+    		rs = "{ \"status\":500, \"message\": \"" + fs.getError() + "\" }";
     	}
 
     	return rs;
     }
 
     @RequestMapping("/all_festivities")
-    public ArrayList<Festivity> all() {
-    	return new Festivity().getBy("all", null, null, null, null);
+    public String all() {
+    	ArrayList<Festivity> festivities = new Festivity().getBy("all", null, null, null, null);
+    	String rs = getJSONString(festivities);
+    	return "{ \"status\":200, \"festivities\": " + rs + " }";
     }
 
     @RequestMapping("/festivity")
-    public ArrayList<Festivity> byName(@RequestParam(value="name") String name) {
-    	//return new Festivity().getBy("name", name, null, null, null);
+    public String byName(@RequestParam(value="name") String name) {
     	ArrayList<Festivity> f = new Festivity().getBy("name", name, null, null, null);
-    	return f;
+    	if ( f.isEmpty() ) {
+    		return "{ \"status\":404, \"message\": \"no results found\" }";
+    	} else {
+    		String rs = getJSONString(f);
+    		return "{ \"status\":200, \"festivities\": " + rs + " }";
+    	}
     }
     
     @RequestMapping("/festivity_by_date")
-    public ArrayList<Festivity> byStartDate(@RequestParam(value="date") String date) throws ParseException {
-    	return new Festivity().getBy("start_date", null, format.parse(date), null, null);
+    public String byStartDate(@RequestParam(value="date") String dateString) throws ParseException {
+    	Date date = new Date();
+    	try {
+    		date = format.parse(dateString);
+    	} catch (ParseException e) {
+    		return "{ \"status\":500, \"message\": \"" + e.toString() + "\" }";
+    	}
+    	ArrayList<Festivity> festivities =  new Festivity().getBy("start_date", null, date, null, null);
+    	if ( festivities.isEmpty() ) {
+    		return "{ \"status\":404, \"message\": \"no results found\" }";
+    	} else {
+    		String rs = getJSONString(festivities);
+    		return "{ \"status\":200, \"festivities\": " + rs + " }";
+    	}
     }
     
     @RequestMapping("/festivity_by_date_range")
-    public ArrayList<Festivity> byDateRange(
-    		@RequestParam(value="from") String from,
-    		@RequestParam(value="to") String to) throws ParseException {
-    	return new Festivity().getBy("date_range", null, format.parse(from), format.parse(to), null);
+    public String byDateRange(
+    		@RequestParam(value="from") String fromString,
+    		@RequestParam(value="to") String toString) throws ParseException {
+    	Date from = new Date();
+    	Date to = new Date();
+    	try {
+    		from = format.parse(fromString);
+    		to = format.parse(toString);
+    	} catch (ParseException e) {
+    		return "{ \"status\":500, \"message\": \"" + e.toString() + "\" }";
+    	}
+
+    	ArrayList<Festivity> festivities =   new Festivity().getBy("date_range", null, from, to, null);
+    	if ( festivities.isEmpty() ) {
+    		return "{ \"status\":404, \"message\": \"no results found\" }";
+    	} else {
+    		String rs = getJSONString(festivities);
+    		return "{ \"status\":200, \"festivities\": " + rs + " }";
+    	}
     }
     
     @RequestMapping("/festivity_by_place")
-    public ArrayList<Festivity> byPlance(@RequestParam(value="where") String where) throws ParseException {
-    	return new Festivity().getBy("date_range", null, null, null, where);
+    public String byPlance(@RequestParam(value="where") String where) throws ParseException {
+    	ArrayList<Festivity> festivities =   new Festivity().getBy("date_range", null, null, null, where);
+    	if ( festivities.isEmpty() ) {
+    		return "{ \"status\":404, \"message\": \"no results found\" }";
+    	} else {
+    		String rs = getJSONString(festivities);
+    		return "{ \"status\":200, \"festivities\": " + rs + " }";
+    	}
     }
+    
+    /**
+     * Get the festivities in a JSON-readable form
+     * @param festivities
+     * @return String	In JSON format
+     */
+	private String getJSONString(ArrayList<Festivity> festivities) {
+		ArrayList<String> festJSON = new ArrayList<String>();
+    	Iterator<Festivity> it = festivities.iterator();
+    	String tmpFest;
+    	while(it.hasNext()) {
+    		Festivity festivity = (Festivity) it.next();
+    		tmpFest = "";
+    		tmpFest += "\"name\": \"" + festivity.getName() + "\", ";
+    		tmpFest += "\"from\": \"" + format.format(festivity.getFrom()) + "\", ";
+    		tmpFest += "\"to\": \"" + format.format(festivity.getTo()) + "\", ";
+    		tmpFest += "\"where\": \"" + festivity.getWhere() + "\"";
+    		festJSON.add(tmpFest);
+    	}
+
+    	return "[ { " + String.join(" }, { ", festJSON) + " } ]";
+	}
     
 }

@@ -24,7 +24,7 @@ public class DataLoader {
 	/**
 	 * Format of the dates used - UTC timezone
 	 */
-	static DateFormat format = new SimpleDateFormat("YYYY-MM-dd");
+	static DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public static void main(String[] args){
 
